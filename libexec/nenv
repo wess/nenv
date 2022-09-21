@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+export NENV_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+source ${NENV_ROOT}/__echo.sh
+source ${NENV_ROOT}/__functions.sh
+
+if [ $# -eq 0 ]; then
+  echo "Directory is required: example: 'nenv .venv'" | error
+  exit 1
+fi
+
+VENV_NAME=$1
+shift
+
+CURRENT_DIR=${PWD}
+VENV_DIR="$CURRENT_DIR/$VENV_NAME"
+BIN_DIR="$CURRENT_DIR/$VENV_NAME/bin"
+NELUA_DIR="$VENV_DIR/nelua"
+
+rm -rf "$VENV_DIR"
+mkdir -p "$NELUA_DIR"
+mkdir -p "$BIN_DIR"
+
+echo "Installing Nelua environment to $VENV_DIR" | status
+
+git clone https://github.com/edubart/nelua-lang.git "$NELUA_DIR/repo"
+cd "$NELUA_DIR/repo"
+make
+
+ln -s "$NELUA_DIR/repo/nelua" "$BIN_DIR/nelua"
+
+echo "Creating activation and deactivation scripts" | status
+
+define ACTIVATE <<EOF
+#!/usr/bin/env bash
+
+export _NENV_VENV_NAME="$VENV_NAME"
+export _NENV_OLD_PATH="\$PATH"
+export _NENV_OLD_PS1="\$PS1"
+
+export NELUA_DIR="$NELUA_DIR"
+export PATH="$BIN_DIR:$PATH"
+export PS1="[nelua : $VENV_NAME] \$_NENV_OLD_PS1"
+
+hash -r 2>/dev/null
+
+deactivate() {
+    export PS1="\$_NENV_OLD_PS1"
+    export PATH="\$_NENV_OLD_PATH"
+
+    hash -r 2>/dev/null
+
+    unset _NENV_VENV_NAME
+    unset _NENV_OLD_PS1
+    unset _NENV_OLD_PATH
+    unset NELUA_DIR
+}
+EOF
+
+ACTIVATE_SCRIPT_PATH="$BIN_DIR/activate"
+touch -- "$ACTIVATE_SCRIPT_PATH"
+
+echo "$ACTIVATE" > "$ACTIVATE_SCRIPT_PATH"
+chmod u+x "$ACTIVATE_SCRIPT_PATH"
+
+echo "Cleaning up venv" | status
+
+unset NENV_ROOT
+unset VENV_NAME
+unset CURRENT_DIR
+unset NELUA_DIR
+unset BIN_DIR
+
+echo "Nelua environment setup complete." | success
+echo "Run: source ./$(basename $VENV_DIR)/bin/activate to start." | info
+
+unset VENV_DIR
