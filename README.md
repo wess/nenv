@@ -1,5 +1,5 @@
 # NENV
-> Virtual environemt for the (https://nelua.io)[Nelua programming language]
+> Virtual environemt for the [https://nelua.io](Nelua programming language)
 
 ## Install
 > MacOS
