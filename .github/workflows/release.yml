@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'VERSION'
+      - '.github/workflows/release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: v
+        run: echo "version=$(<VERSION)" >> "$GITHUB_OUTPUT"
+
+      # nenv tags are bare (e.g. 0.0.1, no "v" prefix) to match the existing
+      # tag and the source-tarball URL the formula points at.
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --tags origin "refs/tags/${V}" | grep -q .; then
+            echo "Tag ${V} already exists"
+          else
+            git tag "${V}"
+            git push origin "${V}"
+          fi
+          if gh release view "${V}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release ${V} already exists"
+          else
+            gh release create "${V}" --repo "${{ github.repository }}" --title "${V}" --generate-notes
+          fi
+
+  update-homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: v
+        run: echo "version=$(<VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Compute source-tarball SHA
+        id: sha
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          URL="https://github.com/${{ github.repository }}/archive/refs/tags/${V}.tar.gz"
+          SHA=$(curl -fsSL "$URL" | sha256sum | cut -d' ' -f1)
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: wess/homebrew-packages
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Update formula
+        env:
+          REPO: ${{ github.repository }}
+          VERSION: ${{ steps.v.outputs.version }}
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          cat > tap/Formula/nenv.rb << RUBY
+          class Nenv < Formula
+            desc "Virtualenv for the Nelua programming language."
+            homepage "https://github.com/${REPO}"
+            url "https://github.com/${REPO}/archive/refs/tags/${VERSION}.tar.gz"
+            sha256 "${SHA}"
+            license "MIT"
+
+            def install
+              libexec.install Dir["libexec/*"]
+
+              bin.write_exec_script (libexec/"nenv")
+            end
+
+            test do
+              system "true"
+            end
+          end
+          RUBY
+
+      - name: Push updated formula
+        run: |
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/nenv.rb
+          if git diff --cached --quiet; then
+            echo "Formula already up to date"
+          else
+            git commit -m "Update nenv to ${{ steps.v.outputs.version }}"
+            git push
+          fi
