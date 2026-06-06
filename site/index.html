@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nenv — virtual environments for Nelua</title>
+    <meta
+      name="description"
+      content="nenv is a tiny command-line tool that creates isolated, per-project virtual environments for the Nelua programming language — like virtualenv, but for Nelua. Activate, build, deactivate."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>:root{--accent:#2dd4a7;--accent2:#38bdf8}</style>
+  </head>
+  <body>
+    <!-- nav -->
+    <nav class="nav">
+      <div class="wrap">
+        <a class="brand" href="index.html"><span class="mark">◈</span> nenv</a>
+        <button class="navtoggle" aria-label="Menu" data-nav>☰</button>
+        <div class="navlinks" data-navlinks>
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#start">Get started</a>
+          <a href="docs.html">Docs</a>
+          <a class="btn primary" href="https://github.com/wess/nenv">GitHub</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- hero -->
+    <header class="hero">
+      <div class="wrap">
+        <span class="pill"><span class="dot"></span> A virtual environment for Nelua · macOS via Homebrew</span>
+        <h1>Per-project <span class="accent">Nelua environments</span>, one command away.</h1>
+        <p class="lead">
+          nenv builds an isolated <code>.venv</code> for the
+          <a href="https://nelua.io">Nelua programming language</a> right inside your project. Clone, compile, and
+          symlink the toolchain, then <code>source activate</code> to put a project-local <code>nelua</code> on your
+          PATH — and <code>deactivate</code> to step back out.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="#start">Get started</a>
+          <a class="btn ghost" href="https://github.com/wess/nenv">View on GitHub →</a>
+        </div>
+
+        <!-- terminal mockup -->
+        <div class="code" style="margin-top: 40px; max-width: 720px">
+          <div class="top">
+            <span>terminal</span>
+            <button class="copy" data-copy>Copy</button>
+          </div>
+          <pre data-code><span class="c"># spin up an isolated Nelua toolchain for this project</span>
+$ cd ~/projects/raycaster
+$ nenv .venv
+$ source .venv/bin/activate
+[nelua : .venv] $ which nelua
+<span class="c">→ ~/projects/raycaster/.venv/bin/nelua</span>
+[nelua : .venv] $ deactivate
+$</pre>
+        </div>
+      </div>
+    </header>
+
+    <!-- features -->
+    <section class="block" id="features">
+      <div class="wrap">
+        <div class="eyebrow">Features</div>
+        <h2>Familiar virtualenv ergonomics, made for Nelua.</h2>
+        <p class="sub">A single, dependency-light shell script that keeps each project's compiler in its own sandbox.</p>
+        <div class="grid">
+          <div class="card">
+            <div class="ico">📦</div>
+            <h3>Isolated by project</h3>
+            <p>Each <code>nenv .venv</code> lives inside your project directory, so one repo's Nelua never collides with another's.</p>
+          </div>
+          <div class="card">
+            <div class="ico">⚙️</div>
+            <h3>Builds Nelua for you</h3>
+            <p>Clones <code>nelua-lang</code> and runs <code>make</code>, then symlinks the freshly built <code>nelua</code> into the venv's bin.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🔌</div>
+            <h3>Activate &amp; deactivate</h3>
+            <p>Source the generated <code>activate</code> script to prepend the venv's bin to PATH; <code>deactivate</code> restores everything.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🏷️</div>
+            <h3>Prompt awareness</h3>
+            <p>Your shell prompt shows <code>[nelua : .venv]</code> while active, so you always know which environment you're in.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🍺</div>
+            <h3>Homebrew install</h3>
+            <p>Tap and install on macOS in two commands — no runtime dependencies beyond a shell, git, and make.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🪶</div>
+            <h3>Pure shell, tiny</h3>
+            <p>A handful of Bash scripts — no daemon, no config files, nothing to learn. It just does the one thing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- how it works -->
+    <section class="block" id="how">
+      <div class="wrap">
+        <div class="eyebrow">How it works</div>
+        <h2>From empty directory to working compiler.</h2>
+        <p class="sub">
+          One <code>nenv</code> invocation does the whole setup; sourcing the activate script swaps your environment in
+          and out.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <h4>Name the venv</h4>
+            <p>Run <code>nenv .venv</code> in your project. nenv creates the venv directory and a <code>bin</code> for it.</p>
+          </div>
+          <div class="step">
+            <h4>Build Nelua</h4>
+            <p>It clones <code>nelua-lang</code>, compiles it with <code>make</code>, and symlinks <code>nelua</code> into the venv.</p>
+          </div>
+          <div class="step">
+            <h4>Activate</h4>
+            <p><code>source .venv/bin/activate</code> prepends the venv bin to PATH and relabels your prompt.</p>
+          </div>
+          <div class="step">
+            <h4>Deactivate</h4>
+            <p>Call <code>deactivate</code> to restore the original PATH and prompt — your shell is back to normal.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- get started -->
+    <section class="block" id="start">
+      <div class="wrap">
+        <div class="eyebrow">Get started</div>
+        <h2>Install on macOS, then create your first venv.</h2>
+        <p class="sub">Tap and install via Homebrew, then run nenv inside any project directory.</p>
+        <div class="code" style="margin-top: 32px; max-width: 720px">
+          <div class="top">
+            <span>terminal</span>
+            <button class="copy" data-copy>Copy</button>
+          </div>
+          <pre data-code><span class="c"># 1. install (macOS)</span>
+brew tap wess/package
+brew install nenv
+
+<span class="c"># 2. create an isolated Nelua environment in your project</span>
+cd ~/to/your/sweet/sweet/project/directory
+nenv .venv
+
+<span class="c"># 3. activate it</span>
+source .venv/bin/activate
+<span class="c"># [nelua : .venv] $  ← your prompt now shows the venv</span>
+
+<span class="c"># ...build with the project-local nelua, then step out</span>
+deactivate</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- cta band -->
+    <section class="band">
+      <div class="wrap">
+        <h2>Keep every Nelua project in its own sandbox.</h2>
+        <p>Open source under the MIT license. A small shell tool that does one job and gets out of your way.</p>
+        <div class="cta">
+          <a class="btn primary" href="docs.html">Read the docs</a>
+          <a class="btn ghost" href="https://github.com/wess/nenv">Star it on GitHub →</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <a class="brand" href="index.html"><span class="mark">◈</span> nenv</a>
+        <div class="links">
+          <a href="docs.html">Docs</a>
+          <a href="#start">Get started</a>
+          <a href="https://nelua.io">Nelua</a>
+          <a href="https://github.com/wess/nenv">GitHub</a>
+        </div>
+        <span>MIT · © 2026</span>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
