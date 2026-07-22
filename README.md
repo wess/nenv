@@ -25,3 +25,5 @@ $
 
 ## LICENSE
 > See license file.
+
+♥ [Sponsor this project](https://github.com/sponsors/wess)
